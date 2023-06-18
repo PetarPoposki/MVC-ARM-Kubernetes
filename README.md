@@ -1,7 +1,10 @@
 # Introduction 
 Code to deploy your web app with SQL Database to Azure Kubernetes Service.
+
 This Repo contains 2 main folders. 
+
 One is ProjectARM, in which the ARM Template and Parameters are described, which will deploy our resources to Azure using IaC paradigms.
+
 The other is RSWEBProject, which contains the source code for our application.
 
 # Getting Started
