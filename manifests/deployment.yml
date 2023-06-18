@@ -1,17 +1,16 @@
 apiVersion : apps/v1
 kind: Deployment
 metadata:
-  name: RSWEBProject 
+  name: rswebproject 
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: RSWEBProject
+      app: rswebproject 
   template:
     metadata:
       labels:
-        app: RSWEBProject
-    spec:
+        app: rswebproject 
       containers:
         - name: RSWEBProject
           image: rswebmvcapp.azurecr.io/rswebproject
