@@ -1,18 +1,19 @@
-apiVersion : apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rswebproject 
+  name: rswebproject
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: rswebproject 
+      app: rswebproject
   template:
     metadata:
       labels:
-        app: rswebproject 
+        app: rswebproject
+    spec:
       containers:
         - name: RSWEBProject
           image: rswebmvcapp.azurecr.io/rswebproject
           ports:
-          - containerPort: 80
+            - containerPort: 80
