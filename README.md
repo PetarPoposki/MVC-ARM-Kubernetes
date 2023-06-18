@@ -11,6 +11,6 @@ The other is RSWEBProject, which contains the source code for our application.
 1.	Clone the repo.
 2.	Push to Azure DevOps repos.
 3.	Deploy the ARM template using Powershell (5.1 or higher), Azure CLI or Azure DevOps pipeline.
-4.	Create a "Deploy to Kubernetes Service Pipeline on Azure DevOps".
+4.	Create a "Deploy to Kubernetes Service Pipeline on Azure DevOps". For this step, you need the azure-pipelines.yml to build and push your image to Azure Container Registry. This step requires the Dockerfile. Then, you need the deployment.yml and service.yml to deploy your image to a Kubernetes node.
 5.	Run the pipeline.
 6.	App is deployed.
