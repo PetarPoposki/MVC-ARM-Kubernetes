@@ -13,7 +13,7 @@ spec:
         app: rswebproject
     spec:
       containers:
-        - name: RSWEBProject
+        - name: rswebproject
           image: rswebmvcapp.azurecr.io/rswebproject
           ports:
             - containerPort: 80
