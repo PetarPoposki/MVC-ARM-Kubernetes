@@ -1,0 +1,162 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "administratorLogin": {
+      "type": "string"
+    },
+    "administratorLoginPassword": {
+      "type": "securestring"
+    },
+    "databaseName": {
+      "type": "string"
+    },
+    "acrName": {
+      "type": "string"
+    },
+    "aksClusterName": {
+      "type": "string"
+    },
+    "aksAgentCount": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1
+    },
+    "aksAgentVMSize": {
+      "type": "string",
+      "defaultValue": "Standard_B2s",
+      "allowedValues": [
+        "Standard_B2s",
+        "Standard_B4s",
+        "Standard_B8s"
+      ]
+    },
+    "storageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    }
+  },
+  "variables": {
+    "webSiteName": "rsweb-mvc-app",
+    "sqlserverName": "rsweb-mvc-app",
+    "storageName": "rswebmvcapp"
+  },
+  "resources": [
+    {
+      "name": "[variables('sqlserverName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "SqlServer"
+      },
+      "apiVersion": "2015-05-01-preview",
+      "properties": {
+        "administratorLogin": "[parameters('administratorLogin')]",
+        "administratorLoginPassword": "[parameters('administratorLoginPassword')]"
+      },
+      "resources": [
+        {
+          "name": "[parameters('databaseName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "tags": {
+            "displayName": "Database"
+          },
+          "apiVersion": "2017-03-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers/', variables('sqlserverName'))]"
+          ],
+          "properties": {
+            "edition": "Basic",
+            "collation": "SQL_Latin1_General_CP1_CI_AS",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "Basic"
+          }
+        },
+        {
+          "type": "firewallrules",
+          "apiVersion": "2015-05-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers/', variables('sqlserverName'))]"
+          ],
+          "location": "[resourceGroup().location]",
+          "name": "AllowAllWindowsAzureIps",
+          "properties": {
+            "endIpAddress": "0.0.0.0",
+            "startIpAddress": "0.0.0.0"
+          }
+        }
+      ]
+    },
+    {
+      "apiVersion": "2023-01-01",
+      "name": "[variables('storageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "StorageAccount"
+      },
+      "sku": {
+        "name": "[parameters('storageType')]"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "supportsHttpsTrafficOnly": true
+      }
+    },
+    {
+      "apiVersion": "2021-09-01",
+      "name": "[parameters('acrName')]",
+      "type": "Microsoft.ContainerRegistry/registries",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard"
+      },
+      "tags": {
+        "displayName": "ACR"
+      },
+      "properties": {
+        "adminUserEnabled": false
+      }
+    },
+    {
+        "type": "Microsoft.ContainerService/managedClusters",
+        "apiVersion": "2022-05-02-preview",
+        "name": "[parameters('aksClusterName')]",
+        "location": "westeurope",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+      "properties": {
+        "dnsPrefix": "rsweb-mvc-app",
+        "agentPoolProfiles": [
+          {
+            "name": "agentpool",
+            "osDiskSizeGB": 0,
+            "count": "[parameters('aksAgentCount')]",
+            "vmSize": "[parameters('aksAgentVMSize')]",
+            "osType": "Linux",
+            "mode": "System"
+          }
+        ],
+        "linuxProfile": {
+          "adminUsername": "petarizam",
+          "ssh": {
+            "publicKeys": [
+              {
+                "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCmV4IQMjKaWAY3zV+cPQiUwlP91TwGuEwE4WhX+MsVvZhipoTWLzEtIUwPED2QCBMu9cw8L2ceHsP2rYr/I6pgSqHFXR8PnXI1pb0sPmp5nKgVuP+hhRjppi3UrXkIrOXBKnxR+GQq6mK+UVn62gjFmJnpetvynAZkGwAFx4NdgSvAP+GnhJr3NVviGrQExucb+7bLJNsLplETkuU3bsRArA927v4CNafoKVi3CJU5N1ggbWXb0qL/QBDtTefnhZODsORtjd7MwQk04yiWLNJ3OSa4fITWJiq55bafQ+0yzsvC4eSoIuJ9VFkNz5unD+iRz/z5UaQ8J+hOS9tujB5094nXvCuEtg/dJ6QxjV/6r8BFQY8/rNNvQ7pVX0luDgsXRuCv5RcMHdBZFwLRoHj9gCs/l98hTs2JVh+UNTZ6/YZK6FP8qH7ClN2ZcidDC3+gZtILyA54zan760S5uvS8v4BroyylgkAAppFc4mLBZPVbErSl2Epc9aco1Z2dGP52ZtFvz5DZZ0QYw4xnfY/2dzL7aNy1V+tQVdc0zRumJ5N5eh5Fq2GTADzulVhr7ZLKQcjKXfHb1zEFHN5lrnWck165jk09dmHrwgIC1AC4nR13qfLJXGGgN24BzD+bVsVTTpuBDKsMdYKba/qBe12js9Gcn+DLedor5lQD9YkdVQ== azureuser@linuxvm"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

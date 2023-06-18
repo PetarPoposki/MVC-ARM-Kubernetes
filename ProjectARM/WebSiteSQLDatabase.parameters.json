@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "administratorLogin": {
+      "value": "Petarizam"
+    },
+    "administratorLoginPassword": {
+      "value": "FEITpetar!2000"
+    },
+    "databaseName": {
+      "value": "petarizam"
+    },
+    "acrName": {
+      "value": "rswebmvcapp"
+    },
+    "aksClusterName": {
+      "value": "rswebmvcapp"
+    },
+    "aksAgentCount": {
+      "value": 1
+    },
+    "aksAgentVMSize": {
+      "value": "Standard_B2s"
+    },
+    "storageType": {
+      "value": "Standard_LRS"
+    }
+  }
+}
